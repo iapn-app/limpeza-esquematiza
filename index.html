@@ -230,6 +230,7 @@ body{font-family:-apple-system,sans-serif;background:#fff;color:#1a1a1a;min-heig
       ✅ Concluir Serviço
     </button>
     <div class="btn-fim-hint" id="btnHint">Tire uma foto acima para liberar este botão</div>
+    <button type="button" style="width:100%;padding:10px;background:red;color:white;border:none;border-radius:8px;margin-top:8px;font-size:14px;" onclick="testarBotao()">🔍 DEBUG: ver estado</button>
   </div>
 
 </div>
@@ -428,16 +429,22 @@ function marcar(iid){marc[areaAtual][iid]=!marc[areaAtual][iid];desenharTiles();
 
 function aoSelecionarFoto(e){
   var f=e.target.files[0];
-  if(!f){return;}
+  if(!f){alert('DEBUG: nenhum arquivo');return;}
+  alert('DEBUG foto selecionada: '+f.name);
   var r=new FileReader();
   r.onload=function(ev){
-    var resultado=ev.target.result;
-    fotos.push(resultado);
+    fotos.push(ev.target.result);
+    alert('DEBUG foto no array! total='+fotos.length);
     renderFotos();
+    alert('DEBUG renderFotos ok. btn disabled='+document.getElementById('btnFim').disabled);
   };
-  r.onerror=function(){alert('Erro ao carregar foto. Tente novamente.');};
+  r.onerror=function(){alert('ERRO FileReader');};
   r.readAsDataURL(f);
   e.target.value='';
+}
+
+function testarBotao(){
+  alert('fotos='+fotos.length+' posto='+postoAtual+' area='+areaAtual);
 }
 
 function renderFotos(){

@@ -157,7 +157,7 @@ body{font-family:-apple-system,sans-serif;background:#fff;color:#1a1a1a;min-heig
 @keyframes cair{0%{transform:translateY(0) rotate(0deg);opacity:1;}100%{transform:translateY(460px) rotate(720deg);opacity:0;}}
 @keyframes popIn{0%{transform:scale(0);opacity:0;}60%{transform:scale(1.2);}100%{transform:scale(1);opacity:1;}}
 
-.btn-fim-desabilitado{width:100%;padding:16px;background:#ccc;color:#fff;font-size:16px;font-weight:700;border:none;border-radius:12px;cursor:default;font-family:-apple-system,sans-serif;margin-top:14px;}
+.btn-fim-desabilitado{width:100%;padding:16px;background:#ccc;color:#fff;font-size:16px;font-weight:700;border:none;border-radius:12px;cursor:default;font-family:-apple-system,sans-serif;margin-top:14px;pointer-events:none;opacity:0.6;}
 .btn-fim-habilitado{width:100%;padding:16px;background:#333a56;color:#fff;font-size:16px;font-weight:700;border:none;border-radius:12px;cursor:pointer;font-family:-apple-system,sans-serif;margin-top:14px;}
 .btn-fim-habilitado:active{opacity:.8;}
 .btn-fim-hint{font-size:12px;color:#aaa;text-align:center;margin-top:6px;}
@@ -226,7 +226,7 @@ body{font-family:-apple-system,sans-serif;background:#fff;color:#1a1a1a;min-heig
       </button>
       <input type="file" id="photoInput" accept="image/*" capture="environment" onchange="aoSelecionarFoto(event)" />
     </div>
-    <button type="button" class="btn-fim-desabilitado" id="btnFim" onclick="finalizar()">
+    <button type="button" class="btn-fim-desabilitado" id="btnFim" disabled onclick="finalizar()">
       ✅ Concluir Serviço
     </button>
     <div class="btn-fim-hint" id="btnHint">Tire uma foto acima para liberar este botão</div>
@@ -427,14 +427,17 @@ function desenharTiles(){
 function marcar(iid){marc[areaAtual][iid]=!marc[areaAtual][iid];desenharTiles();desenharAreas();}
 
 function aoSelecionarFoto(e){
-  var f=e.target.files[0]; if(!f)return;
+  var f=e.target.files[0];
+  if(!f){return;}
   var r=new FileReader();
   r.onload=function(ev){
-    fotos.push(ev.target.result);
+    var resultado=ev.target.result;
+    fotos.push(resultado);
     renderFotos();
-    document.getElementById('photoInput').value='';
   };
+  r.onerror=function(){alert('Erro ao carregar foto. Tente novamente.');};
   r.readAsDataURL(f);
+  e.target.value='';
 }
 
 function renderFotos(){
@@ -452,10 +455,12 @@ function renderFotos(){
   var sub=document.getElementById('fotoHint');
   if(temFoto){
     btn.className='btn-fim-habilitado';
+    btn.disabled=false;
     if(hint) hint.style.display='none';
     if(sub) sub.textContent=fotos.length+' foto'+(fotos.length>1?'s':'')+' adicionada'+(fotos.length>1?'s':'');
   } else {
     btn.className='btn-fim-desabilitado';
+    btn.disabled=true;
     if(hint) hint.style.display='';
     if(sub) sub.textContent='Tire pelo menos 1 foto para concluir';
   }

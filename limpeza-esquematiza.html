@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Limpeza - Grupo Esquematiza</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+body {
+  font-family: -apple-system, sans-serif;
+  background: #111;
+  color: #f0f0f0;
+  min-height: 100vh;
+  font-size: 16px;
+}
+
+/* HEADER */
+.header {
+  background: #1a1a1a;
+  border-bottom: 2px solid #00e5a0;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+.header h1 { font-size: 18px; font-weight: 700; color: #00e5a0; }
+.header h1 span { color: #fff; }
+
+.tab-bar {
+  display: flex;
+  background: #1a1a1a;
+  border-bottom: 1px solid #333;
+  position: sticky;
+  top: 57px;
+  z-index: 49;
+}
+.tab {
+  flex: 1;
+  padding: 14px;
+  text-align: center;
+  font-size: 15px;
+  font-weight: 600;
+  color: #888;
+  border: none;
+  background: none;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+}
+.tab.ativo {
+  color: #00e5a0;
+  border-bottom: 3px solid #00e5a0;
+}
+
+/* PAGES */
+.page { display: none; padding: 20px; }
+.page.ativo { display: block; }
+
+/* CAMPOS */
+.campo { margin-bottom: 16px; }
+.campo label {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+}
+.campo select,
+.campo input {
+  width: 100%;
+  padding: 14px;
+  background: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 10px;
+  color: #f0f0f0;
+  font-size: 16px;
+  font-family: -apple-system, sans-serif;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.campo select:focus,
+.campo input:focus {
+  outline: none;
+  border-color: #00e5a0;
+}
+
+/* AREAS */
+.titulo-secao {
+  font-size: 13px;
+  font-weight: 700;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin: 20px 0 12px;
+}
+
+.areas {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+.area-btn {
+  background: #1a1a1a;
+  border: 2px solid #333;
+  border-radius: 12px;
+  padding: 16px 10px;
+  text-align: center;
+  cursor: pointer;
+  color: #888;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: -apple-system, sans-serif;
+  transition: all 0.15s;
+  -webkit-appearance: none;
+  width: 100%;
+}
+.area-btn.ativo {
+  border-color: #00e5a0;
+  color: #00e5a0;
+  background: rgba(0,229,160,0.08);
+}
+.area-btn .ico { font-size: 26px; display: block; margin-bottom: 6px; }
+.area-progresso { font-size: 11px; margin-top: 4px; color: #555; }
+.area-btn.ativo .area-progresso { color: #00a870; }
+
+/* TIMER */
+.timer-box {
+  background: rgba(0,229,160,0.07);
+  border: 1px solid rgba(0,229,160,0.3);
+  border-radius: 12px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+.timer-info { }
+.timer-info small { font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 1px; }
+.timer-info .hora-ini { font-size: 20px; font-weight: 700; color: #00e5a0; }
+.timer-relogio {
+  font-size: 28px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 2px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* CHECKLIST */
+.checklist-topo {
+  background: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 12px 12px 0 0;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.checklist-titulo { font-size: 17px; font-weight: 700; }
+.progresso-texto { font-size: 14px; color: #888; }
+.progresso-barra {
+  height: 4px;
+  background: #333;
+  border-radius: 0;
+  overflow: hidden;
+  margin-bottom: 0;
+}
+.progresso-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #00e5a0, #0099ff);
+  border-radius: 0;
+  transition: width 0.3s;
+}
+
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  padding: 14px;
+  background: #1a1a1a;
+  border: 1px solid #333;
+  border-top: none;
+  border-radius: 0 0 12px 12px;
+  margin-bottom: 20px;
+}
+.tile {
+  background: #222;
+  border: 2px solid #333;
+  border-radius: 12px;
+  padding: 14px 6px 12px;
+  text-align: center;
+  cursor: pointer;
+  position: relative;
+  font-family: -apple-system, sans-serif;
+  -webkit-appearance: none;
+  width: 100%;
+  transition: all 0.15s;
+}
+.tile:active { transform: scale(0.95); }
+.tile.marcado {
+  border-color: #00e5a0;
+  background: rgba(0,229,160,0.1);
+}
+.tile .check {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 18px;
+  height: 18px;
+  border: 2px solid #444;
+  border-radius: 4px;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #111;
+  font-weight: 900;
+}
+.tile.marcado .check {
+  background: #00e5a0;
+  border-color: #00e5a0;
+}
+.tile .t-ico { font-size: 26px; display: block; margin-bottom: 5px; }
+.tile .t-nome { font-size: 12px; font-weight: 700; color: #f0f0f0; }
+.tile.marcado .t-nome { color: #00e5a0; }
+
+/* FOTO E FINALIZAR */
+.foto-box {
+  background: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 16px;
+}
+.foto-titulo {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+.foto-sub { font-size: 13px; color: #888; margin-bottom: 14px; }
+.foto-area {
+  border: 2px dashed #444;
+  border-radius: 10px;
+  padding: 32px 20px;
+  text-align: center;
+  cursor: pointer;
+  color: #888;
+  margin-bottom: 14px;
+}
+.foto-area.tem-foto { padding: 0; border: 2px solid #00e5a0; }
+.foto-area img {
+  width: 100%;
+  border-radius: 8px;
+  display: block;
+  max-height: 280px;
+  object-fit: cover;
+}
+.foto-ico { font-size: 40px; display: block; margin-bottom: 8px; }
+.foto-txt { font-size: 14px; }
+
+.btn-finalizar {
+  width: 100%;
+  padding: 18px;
+  background: linear-gradient(135deg, #00e5a0, #00b87a);
+  color: #111;
+  font-size: 17px;
+  font-weight: 800;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  font-family: -apple-system, sans-serif;
+  -webkit-appearance: none;
+  transition: opacity 0.2s;
+}
+.btn-finalizar:disabled {
+  opacity: 0.35;
+  pointer-events: none;
+}
+.btn-finalizar:active { opacity: 0.8; }
+
+/* HISTÓRICO */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.stat {
+  background: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 10px;
+  padding: 14px 10px;
+  text-align: center;
+}
+.stat .num { font-size: 28px; font-weight: 800; color: #00e5a0; }
+.stat .leg { font-size: 11px; color: #888; margin-top: 3px; }
+
+.filtros { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+
+.registro {
+  background: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 10px;
+}
+.reg-topo { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.reg-ico { font-size: 26px; flex-shrink: 0; }
+.reg-info { flex: 1; }
+.reg-posto { font-size: 11px; color: #888; margin-bottom: 2px; }
+.reg-area { font-size: 16px; font-weight: 700; margin-bottom: 3px; }
+.reg-resp { font-size: 13px; color: #888; }
+.reg-badge {
+  background: rgba(0,229,160,0.15);
+  color: #00e5a0;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border-radius: 20px;
+  flex-shrink: 0;
+}
+.reg-horarios {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.tag-ini { background: rgba(0,229,160,0.15); color: #00e5a0; font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 20px; }
+.tag-fim { background: rgba(0,153,255,0.15); color: #5bbfff; font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 20px; }
+.tag-dur { background: rgba(255,255,255,0.07); color: #bbb; font-size: 12px; padding: 4px 10px; border-radius: 20px; }
+.reg-foto { margin-top: 12px; }
+.reg-foto img {
+  width: 100%;
+  border-radius: 8px;
+  max-height: 200px;
+  object-fit: cover;
+  border: 1px solid #333;
+  cursor: pointer;
+}
+
+.vazio { text-align: center; padding: 48px 20px; color: #666; }
+.vazio .v-ico { font-size: 48px; margin-bottom: 12px; }
+.vazio p { font-size: 15px; }
+
+/* MODAL */
+.modal-bg {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.9);
+  z-index: 200;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.modal-bg.aberto { display: flex; }
+.modal-box {
+  background: #1a1a1a;
+  border-radius: 16px;
+  padding: 20px;
+  width: 100%;
+  max-width: 480px;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+}
+.modal-fechar {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  background: #333;
+  border: none;
+  color: #fff;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: -apple-system, sans-serif;
+}
+.modal-box img { width: 100%; border-radius: 10px; margin-top: 14px; }
+
+/* TOAST */
+.toast {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%) translateY(10px);
+  background: #00e5a0;
+  color: #111;
+  font-weight: 700;
+  font-size: 14px;
+  padding: 12px 22px;
+  border-radius: 30px;
+  opacity: 0;
+  transition: all 0.3s;
+  z-index: 300;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+#photoInput { display: none; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🧹 <span>Grupo</span> Esquematiza</h1>
+</div>
+
+<div class="tab-bar">
+  <button class="tab ativo" id="tab-checklist" onclick="mudarAba('checklist')">✅ Checklist</button>
+  <button class="tab" id="tab-historico" onclick="mudarAba('historico')">📋 Histórico</button>
+</div>
+
+<!-- PÁGINA CHECKLIST -->
+<div class="page ativo" id="page-checklist">
+
+  <div class="campo">
+    <label>Posto / Local de trabalho</label>
+    <select id="selPosto">
+      <option value="">— Selecione o posto —</option>
+      <option>Sede Central</option>
+      <option>Filial Norte</option>
+      <option>Filial Sul</option>
+      <option>Unidade Leste</option>
+      <option>Unidade Oeste</option>
+      <option>Centro de Treinamento</option>
+    </select>
+  </div>
+
+  <div class="campo">
+    <label>Responsável pela limpeza</label>
+    <input type="text" id="inpResp" placeholder="Digite seu nome" />
+  </div>
+
+  <div class="titulo-secao">Selecione a área a limpar</div>
+
+  <div class="areas" id="areaGrid"></div>
+
+  <!-- CHECKLIST TILES -->
+  <div id="checklistBox" style="display:none">
+    <div class="checklist-topo">
+      <div class="checklist-titulo" id="clTitulo"></div>
+      <div class="progresso-texto" id="clProg">0/0</div>
+    </div>
+    <div class="progresso-barra">
+      <div class="progresso-fill" id="clBarra" style="width:0%"></div>
+    </div>
+
+    <div class="timer-box" style="margin-top:0;border-radius:0;border-top:none;border-left:1px solid #333;border-right:1px solid #333;">
+      <div class="timer-info">
+        <small>Início da limpeza</small>
+        <div class="hora-ini" id="horaIniDisplay">--:--</div>
+      </div>
+      <div class="timer-relogio" id="relogio">00:00</div>
+    </div>
+
+    <div class="tiles" id="tilesGrid"></div>
+  </div>
+
+  <!-- FOTO + FINALIZAR -->
+  <div id="finalizarBox" style="display:none">
+    <div class="foto-box">
+      <div class="foto-titulo">📷 Foto do local limpo</div>
+      <div class="foto-sub">Obrigatória para finalizar</div>
+      <div class="foto-area" id="fotoArea" onclick="document.getElementById('photoInput').click()">
+        <span class="foto-ico">📷</span>
+        <span class="foto-txt">Toque para tirar a foto</span>
+        <img id="fotoPreview" style="display:none" alt="foto" />
+      </div>
+      <input type="file" id="photoInput" accept="image/*" capture="environment" onchange="aoSelecionarFoto(event)" />
+    </div>
+    <button class="btn-finalizar" id="btnFinalizar" onclick="finalizar()" disabled>
+      ✅ Finalizar Limpeza
+    </button>
+  </div>
+
+</div>
+
+<!-- PÁGINA HISTÓRICO -->
+<div class="page" id="page-historico">
+
+  <div class="stats">
+    <div class="stat"><div class="num" id="stTotal">0</div><div class="leg">Realizados</div></div>
+    <div class="stat"><div class="num" id="stHoje">0</div><div class="leg">Hoje</div></div>
+    <div class="stat"><div class="num" id="stPostos">0</div><div class="leg">Postos</div></div>
+  </div>
+
+  <div class="filtros">
+    <div class="campo" style="margin:0">
+      <label>Posto</label>
+      <select id="fPosto" onchange="renderHist()">
+        <option value="">Todos</option>
+        <option>Sede Central</option><option>Filial Norte</option><option>Filial Sul</option>
+        <option>Unidade Leste</option><option>Unidade Oeste</option><option>Centro de Treinamento</option>
+      </select>
+    </div>
+    <div class="campo" style="margin:0">
+      <label>Área</label>
+      <select id="fArea" onchange="renderHist()">
+        <option value="">Todas</option>
+        <option>Recepção</option><option>Sala de Reunião</option><option>Aquário</option>
+        <option>Sala da Gerência</option><option>Sala do Financeiro</option>
+        <option>Banheiro Feminino</option><option>Banheiro Masculino</option><option>Área Externa</option>
+      </select>
+    </div>
+  </div>
+
+  <div id="histList"></div>
+
+</div>
+
+<!-- MODAL FOTO -->
+<div class="modal-bg" id="modal" onclick="fecharModal()">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <button class="modal-fechar" onclick="fecharModal()">✕</button>
+    <div id="modalConteudo"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+var AREAS = [
+  {id:'recepcao',   ico:'🪑', nome:'Recepção'},
+  {id:'reuniao',    ico:'🗂️',  nome:'Sala de Reunião'},
+  {id:'aquario',    ico:'🐟', nome:'Aquário'},
+  {id:'gerencia',   ico:'💼', nome:'Sala da Gerência'},
+  {id:'financeiro', ico:'💰', nome:'Sala do Financeiro'},
+  {id:'banhF',      ico:'🚺', nome:'Banheiro Feminino'},
+  {id:'banhM',      ico:'🚹', nome:'Banheiro Masculino'},
+  {id:'externa',    ico:'🌳', nome:'Área Externa'}
+];
+
+var ITENS = [
+  {id:'chao',      ico:'🧹', nome:'Chão'},
+  {id:'teto',      ico:'☁️',  nome:'Teto'},
+  {id:'vidro',     ico:'🪟', nome:'Vidro'},
+  {id:'tc',        ico:'📐', nome:'TC'},
+  {id:'todape',    ico:'🔲', nome:'Toda Pé'},
+  {id:'parede',    ico:'🧱', nome:'Parede'},
+  {id:'moveis',    ico:'🛋️', nome:'Móveis'},
+  {id:'lixeira',   ico:'🗑️', nome:'Lixeira'},
+  {id:'porta',     ico:'🚪', nome:'Porta'},
+  {id:'ar',        ico:'❄️', nome:'Ar-cond.'},
+  {id:'tomada',    ico:'🔌', nome:'Tomadas'},
+  {id:'luminaria', ico:'💡', nome:'Luminária'}
+];
+
+var MAP_ITENS = {
+  recepcao:   ['chao','teto','vidro','tc','todape','parede','moveis','lixeira','porta','ar','luminaria'],
+  reuniao:    ['chao','teto','vidro','tc','todape','parede','moveis','lixeira','porta','ar','luminaria'],
+  aquario:    ['chao','teto','vidro','tc','todape','parede','moveis','lixeira','luminaria'],
+  gerencia:   ['chao','teto','vidro','tc','todape','parede','moveis','lixeira','porta','ar','luminaria'],
+  financeiro: ['chao','teto','vidro','tc','todape','parede','moveis','lixeira','porta','ar','tomada','luminaria'],
+  banhF:      ['chao','teto','vidro','tc','todape','parede','lixeira','porta','luminaria'],
+  banhM:      ['chao','teto','vidro','tc','todape','parede','lixeira','porta','luminaria'],
+  externa:    ['chao','teto','vidro','tc','todape','parede','lixeira','porta','luminaria']
+};
+
+var hist = JSON.parse(localStorage.getItem('esq_v4') || '[]');
+var areaAtual = null;
+var marcados = {};
+var fotoData = null;
+var horaIni = null;
+var tsIni = null;
+var interval = null;
+
+// INIT
+desenharAreas();
+renderHist();
+atualizarStats();
+
+function desenharAreas() {
+  var html = '';
+  for (var i = 0; i < AREAS.length; i++) {
+    var a = AREAS[i];
+    var ids = MAP_ITENS[a.id];
+    var total = ids.length;
+    var feitos = marcados[a.id] ? ids.filter(function(x){ return marcados[a.id][x]; }).length : 0;
+    var ativo = areaAtual === a.id ? ' ativo' : '';
+    html += '<button class="area-btn' + ativo + '" onclick="selecionarArea(\'' + a.id + '\')">';
+    html += '<span class="ico">' + a.ico + '</span>';
+    html += a.nome;
+    html += '<div class="area-progresso">' + feitos + '/' + total + '</div>';
+    html += '</button>';
+  }
+  document.getElementById('areaGrid').innerHTML = html;
+}
+
+function selecionarArea(id) {
+  if (areaAtual !== id) {
+    pararTimer();
+    horaIni = new Date();
+    tsIni = Date.now();
+    iniciarTimer();
+  }
+  areaAtual = id;
+  if (!marcados[id]) {
+    marcados[id] = {};
+    var ids = MAP_ITENS[id];
+    for (var i = 0; i < ids.length; i++) marcados[id][ids[i]] = false;
+  }
+  desenharAreas();
+  desenharTiles();
+  setTimeout(function() {
+    document.getElementById('checklistBox').scrollIntoView({behavior:'smooth', block:'start'});
+  }, 100);
+}
+
+function iniciarTimer() {
+  document.getElementById('horaIniDisplay').textContent =
+    horaIni.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'});
+  interval = setInterval(function() {
+    var s = Math.floor((Date.now() - tsIni) / 1000);
+    var m = String(Math.floor(s / 60)).padStart(2, '0');
+    var ss = String(s % 60).padStart(2, '0');
+    document.getElementById('relogio').textContent = m + ':' + ss;
+  }, 1000);
+}
+
+function pararTimer() {
+  if (interval) { clearInterval(interval); interval = null; }
+}
+
+function duracao() {
+  if (!tsIni) return '-';
+  var s = Math.floor((Date.now() - tsIni) / 1000);
+  var m = Math.floor(s / 60);
+  return m > 0 ? (m + 'min ' + (s % 60) + 's') : (s + 's');
+}
+
+function desenharTiles() {
+  var a = null;
+  for (var i = 0; i < AREAS.length; i++) { if (AREAS[i].id === areaAtual) { a = AREAS[i]; break; } }
+  var ids = MAP_ITENS[areaAtual];
+  var total = ids.length;
+  var feitos = ids.filter(function(x){ return marcados[areaAtual][x]; }).length;
+  var pct = Math.round(feitos / total * 100);
+
+  document.getElementById('clTitulo').textContent = a.ico + ' ' + a.nome;
+  document.getElementById('clProg').textContent = feitos + '/' + total;
+  document.getElementById('clBarra').style.width = pct + '%';
+
+  var html = '';
+  for (var i = 0; i < ids.length; i++) {
+    var iid = ids[i];
+    var item = null;
+    for (var j = 0; j < ITENS.length; j++) { if (ITENS[j].id === iid) { item = ITENS[j]; break; } }
+    var ok = marcados[areaAtual][iid];
+    html += '<button class="tile' + (ok ? ' marcado' : '') + '" onclick="marcar(\'' + iid + '\')">';
+    html += '<div class="check">' + (ok ? '✓' : '') + '</div>';
+    html += '<span class="t-ico">' + item.ico + '</span>';
+    html += '<div class="t-nome">' + item.nome + '</div>';
+    html += '</button>';
+  }
+
+  document.getElementById('tilesGrid').innerHTML = html;
+  document.getElementById('checklistBox').style.display = 'block';
+
+  // Verificar se tudo marcado
+  var tudoFeito = (feitos === total);
+  document.getElementById('finalizarBox').style.display = tudoFeito ? 'block' : 'none';
+  if (tudoFeito) {
+    setTimeout(function() {
+      document.getElementById('finalizarBox').scrollIntoView({behavior:'smooth', block:'nearest'});
+    }, 150);
+  }
+}
+
+function marcar(iid) {
+  marcados[areaAtual][iid] = !marcados[areaAtual][iid];
+  desenharTiles();
+  desenharAreas();
+}
+
+function aoSelecionarFoto(e) {
+  var f = e.target.files[0];
+  if (!f) return;
+  var reader = new FileReader();
+  reader.onload = function(ev) {
+    fotoData = ev.target.result;
+    var prev = document.getElementById('fotoPreview');
+    prev.src = fotoData;
+    prev.style.display = 'block';
+    var area = document.getElementById('fotoArea');
+    area.classList.add('tem-foto');
+    area.querySelector('.foto-ico').style.display = 'none';
+    area.querySelector('.foto-txt').style.display = 'none';
+    document.getElementById('btnFinalizar').disabled = false;
+  };
+  reader.readAsDataURL(f);
+}
+
+function finalizar() {
+  var posto = document.getElementById('selPosto').value;
+  var resp = document.getElementById('inpResp').value.trim();
+  if (!posto) { alert('Selecione o posto!'); return; }
+  if (!resp) { alert('Informe o responsável!'); return; }
+  if (!fotoData) { alert('Tire uma foto antes de finalizar!'); return; }
+
+  var hFim = new Date().toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'});
+  var hIni = horaIni ? horaIni.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'}) : '--:--';
+  var dur = duracao();
+
+  var a = null;
+  for (var i = 0; i < AREAS.length; i++) { if (AREAS[i].id === areaAtual) { a = AREAS[i]; break; } }
+
+  hist.unshift({
+    id: Date.now(),
+    posto: posto,
+    resp: resp,
+    area: a.nome,
+    ico: a.ico,
+    data: new Date().toLocaleDateString('pt-BR'),
+    horaIni: hIni,
+    horaFim: hFim,
+    duracao: dur,
+    foto: fotoData
+  });
+  localStorage.setItem('esq_v4', JSON.stringify(hist));
+
+  // Reset
+  pararTimer();
+  marcados[areaAtual] = {};
+  var ids = MAP_ITENS[areaAtual];
+  for (var i = 0; i < ids.length; i++) marcados[areaAtual][ids[i]] = false;
+  fotoData = null;
+  horaIni = null;
+  tsIni = null;
+  areaAtual = null;
+
+  document.getElementById('checklistBox').style.display = 'none';
+  document.getElementById('finalizarBox').style.display = 'none';
+  document.getElementById('relogio').textContent = '00:00';
+  document.getElementById('horaIniDisplay').textContent = '--:--';
+  document.getElementById('fotoPreview').style.display = 'none';
+  document.getElementById('fotoPreview').src = '';
+  document.getElementById('photoInput').value = '';
+  document.getElementById('fotoArea').classList.remove('tem-foto');
+  document.getElementById('fotoArea').querySelector('.foto-ico').style.display = '';
+  document.getElementById('fotoArea').querySelector('.foto-txt').style.display = '';
+  document.getElementById('btnFinalizar').disabled = true;
+
+  desenharAreas();
+  atualizarStats();
+  toast('✅ Limpeza registrada com sucesso!');
+}
+
+function renderHist() {
+  var fp = document.getElementById('fPosto').value;
+  var fa = document.getElementById('fArea').value;
+  var lista = hist.filter(function(h) {
+    return (!fp || h.posto === fp) && (!fa || h.area === fa);
+  });
+  var el = document.getElementById('histList');
+  if (!lista.length) {
+    el.innerHTML = '<div class="vazio"><div class="v-ico">📋</div><p>Nenhum registro ainda.<br>Conclua uma limpeza para aparecer aqui.</p></div>';
+    return;
+  }
+  var html = '';
+  for (var i = 0; i < lista.length; i++) {
+    var h = lista[i];
+    html += '<div class="registro">';
+    html += '<div class="reg-topo">';
+    html += '<div class="reg-ico">' + h.ico + '</div>';
+    html += '<div class="reg-info">';
+    html += '<div class="reg-posto">' + h.posto + '</div>';
+    html += '<div class="reg-area">' + h.area + '</div>';
+    html += '<div class="reg-resp">👤 ' + h.resp + '</div>';
+    html += '</div>';
+    html += '<span class="reg-badge">Concluído</span>';
+    html += '</div>';
+    html += '<div class="reg-horarios">';
+    html += '<span class="tag-ini">▶ ' + h.horaIni + '</span>';
+    html += '<span style="color:#555;font-size:12px">→</span>';
+    html += '<span class="tag-fim">⏹ ' + h.horaFim + '</span>';
+    html += '<span class="tag-dur">⏱ ' + h.duracao + '</span>';
+    html += '</div>';
+    if (h.foto) {
+      html += '<div class="reg-foto"><img src="' + h.foto + '" onclick="abrirFoto(' + h.id + ')" /></div>';
+    }
+    html += '</div>';
+  }
+  el.innerHTML = html;
+}
+
+function abrirFoto(id) {
+  var h = null;
+  for (var i = 0; i < hist.length; i++) { if (hist[i].id === id) { h = hist[i]; break; } }
+  if (!h || !h.foto) return;
+  document.getElementById('modalConteudo').innerHTML =
+    '<div style="font-size:18px;font-weight:700;margin-bottom:4px">' + h.ico + ' ' + h.area + '</div>' +
+    '<div style="font-size:13px;color:#888;margin-bottom:2px">' + h.posto + ' · 👤 ' + h.resp + '</div>' +
+    '<div style="font-size:13px;color:#888;margin-bottom:10px">📅 ' + h.data + '</div>' +
+    '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:4px">' +
+    '<span style="background:rgba(0,229,160,.15);color:#00e5a0;padding:4px 12px;border-radius:20px;font-size:13px">▶ ' + h.horaIni + '</span>' +
+    '<span style="background:rgba(0,153,255,.15);color:#5bbfff;padding:4px 12px;border-radius:20px;font-size:13px">⏹ ' + h.horaFim + '</span>' +
+    '<span style="background:#222;color:#bbb;padding:4px 12px;border-radius:20px;font-size:13px">⏱ ' + h.duracao + '</span>' +
+    '</div>' +
+    '<img src="' + h.foto + '" />';
+  document.getElementById('modal').classList.add('aberto');
+}
+
+function fecharModal() { document.getElementById('modal').classList.remove('aberto'); }
+
+function atualizarStats() {
+  document.getElementById('stTotal').textContent = hist.length;
+  var hoje = new Date().toLocaleDateString('pt-BR');
+  var c = 0;
+  for (var i = 0; i < hist.length; i++) { if (hist[i].data === hoje) c++; }
+  document.getElementById('stHoje').textContent = c;
+  var postos = {};
+  for (var i = 0; i < hist.length; i++) { postos[hist[i].posto] = 1; }
+  document.getElementById('stPostos').textContent = Object.keys(postos).length;
+}
+
+function mudarAba(aba) {
+  document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('ativo'); });
+  document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('ativo'); });
+  document.getElementById('page-' + aba).classList.add('ativo');
+  document.getElementById('tab-' + aba).classList.add('ativo');
+  if (aba === 'historico') { renderHist(); atualizarStats(); }
+}
+
+function toast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(function() { t.classList.remove('show'); }, 3000);
+}
+</script>
+</body>
+</html>

@@ -98,8 +98,15 @@ body{font-family:-apple-system,sans-serif;background:#fff;color:#1a1a1a;min-heig
 .foto-txt{font-size:14px;}
 #photoInput{display:none;}
 .btn-fim{width:100%;padding:16px;background:#333a56;color:#fff;font-size:16px;font-weight:700;border:none;border-radius:12px;cursor:pointer;font-family:-apple-system,sans-serif;margin-top:14px;transition:opacity .2s;}
-.btn-fim:disabled{opacity:.45;pointer-events:none;cursor:not-allowed;}
+.btn-fim{width:100%;padding:16px;background:#ccc;color:#fff;font-size:16px;font-weight:700;border:none;border-radius:12px;cursor:not-allowed;font-family:-apple-system,sans-serif;margin-top:14px;transition:background .25s,opacity .25s;}
+.btn-fim.ativo{background:#333a56;cursor:pointer;}
+.btn-fim.ativo:active{opacity:.8;}
 .btn-fim-hint{font-size:12px;color:#aaa;text-align:center;margin-top:6px;}
+.btn-add-foto{width:100%;padding:13px;background:#f0f1f8;color:#333a56;font-size:15px;font-weight:700;border:1.5px dashed #333a56;border-radius:10px;cursor:pointer;font-family:-apple-system,sans-serif;margin-top:4px;}
+.btn-add-foto:active{background:#e0e2f0;}
+.foto-thumb{position:relative;width:80px;height:80px;border-radius:8px;overflow:hidden;border:1.5px solid #e5e7eb;flex-shrink:0;}
+.foto-thumb img{width:100%;height:100%;object-fit:cover;}
+.foto-thumb-del{position:absolute;top:2px;right:2px;background:rgba(0,0,0,.55);color:#fff;border:none;border-radius:50%;width:20px;height:20px;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;}
 .btn-fim:active{opacity:.8;}
 
 /* HISTÓRICO */
@@ -212,16 +219,15 @@ body{font-family:-apple-system,sans-serif;background:#fff;color:#1a1a1a;min-heig
   <!-- FINALIZAR -->
   <div id="finBox" style="display:none">
     <div class="fin-card">
-      <div class="fin-titulo">📷 Foto do local limpo</div>
-      <div class="fin-sub">Tire uma foto do local e toque em Concluir</div>
-      <div class="foto-zone" id="fotoZone" onclick="document.getElementById('photoInput').click()">
-        <span class="foto-ico">📷</span>
-        <span class="foto-txt">Toque para abrir a câmera</span>
-        <img id="fotoPreview" style="display:none" alt="foto" />
-      </div>
+      <div class="fin-titulo">📷 Fotos do local limpo</div>
+      <div class="fin-sub" id="fotoHint">Tire pelo menos 1 foto para concluir</div>
+      <div id="fotosGrid" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;"></div>
+      <button type="button" class="btn-add-foto" id="btnAddFoto" onclick="document.getElementById('photoInput').click()">
+        + Adicionar foto
+      </button>
       <input type="file" id="photoInput" accept="image/*" capture="environment" onchange="aoSelecionarFoto(event)" />
     </div>
-    <button class="btn-fim" id="btnFim" onclick="finalizar()" disabled>
+    <button type="button" class="btn-fim" id="btnFim" onclick="if(this.classList.contains('ativo')){finalizar();}">
       ✅ Concluir Serviço
     </button>
     <div class="btn-fim-hint" id="btnHint">Tire uma foto acima para liberar este botão</div>
@@ -325,7 +331,7 @@ var postos=JSON.parse(localStorage.getItem('esq_postos')||'["Grupo Esquematiza -
 var postoAtual=null;
 var areaAtual=null;
 var marc={};
-var foto=null;
+var fotos=[];
 var horaIniObj=null;
 var tsIni=null;
 var iv=null;
@@ -377,7 +383,7 @@ function desenharAreas(){
 }
 
 function selecionarArea(id){
-  if(areaAtual!==id){pararTimer();horaIniObj=new Date();tsIni=Date.now();iniciarTimer();}
+  if(areaAtual!==id){pararTimer();horaIniObj=new Date();tsIni=Date.now();iniciarTimer();fotos=[];renderFotos();}
   areaAtual=id;
   if(!marc[id]){marc[id]={};MAP[id].forEach(function(x){marc[id][x]=false;});}
   desenharAreas();
@@ -425,43 +431,59 @@ function aoSelecionarFoto(e){
   var f=e.target.files[0]; if(!f)return;
   var r=new FileReader();
   r.onload=function(ev){
-    foto=ev.target.result;
-    document.getElementById('fotoPreview').src=foto;
-    document.getElementById('fotoPreview').style.display='block';
-    var z=document.getElementById('fotoZone');
-    z.classList.add('tem');
-    z.querySelector('.foto-ico').style.display='none';
-    z.querySelector('.foto-txt').style.display='none';
-    document.getElementById('btnFim').disabled=false;
-    document.getElementById('btnHint').style.display='none';
+    fotos.push(ev.target.result);
+    renderFotos();
+    document.getElementById('photoInput').value='';
   };
   r.readAsDataURL(f);
+}
+
+function renderFotos(){
+  var grid=document.getElementById('fotosGrid');
+  grid.innerHTML='';
+  fotos.forEach(function(src,i){
+    var div=document.createElement('div');
+    div.className='foto-thumb';
+    div.innerHTML='<img src="'+src+'" /><button class="foto-thumb-del" onclick="removerFoto('+i+')">✕</button>';
+    grid.appendChild(div);
+  });
+  var temFoto=fotos.length>0;
+  var btn=document.getElementById('btnFim');
+  var hint=document.getElementById('btnHint');
+  var sub=document.getElementById('fotoHint');
+  if(temFoto){
+    btn.classList.add('ativo');
+    if(hint) hint.style.display='none';
+    if(sub) sub.textContent=fotos.length+' foto'+(fotos.length>1?'s':'')+' adicionada'+(fotos.length>1?'s':'');
+  } else {
+    btn.classList.remove('ativo');
+    if(hint) hint.style.display='';
+    if(sub) sub.textContent='Tire pelo menos 1 foto para concluir';
+  }
+}
+
+function removerFoto(i){
+  fotos.splice(i,1);
+  renderFotos();
 }
 
 function finalizar(){
   var resp=document.getElementById('inpResp').value.trim();
   if(!postoAtual){alert('Selecione um posto!');return;}
   if(!resp){alert('Informe o responsável!');return;}
-  if(!foto){alert('Tire uma foto antes de finalizar!');return;}
+  if(fotos.length===0){alert('Tire pelo menos 1 foto antes de finalizar!');return;}
   var hFim=new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
   var hIni=horaIniObj?horaIniObj.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}):'--:--';
   var a=null; for(var i=0;i<AREAS.length;i++){if(AREAS[i].id===areaAtual){a=AREAS[i];break;}}
-  hist.unshift({id:Date.now(),posto:postoAtual,resp:resp,area:a.nome,ico:a.ico,data:new Date().toLocaleDateString('pt-BR'),horaIni:hIni,horaFim:hFim,duracao:duracao(),foto:foto});
+  hist.unshift({id:Date.now(),posto:postoAtual,resp:resp,area:a.nome,ico:a.ico,data:new Date().toLocaleDateString('pt-BR'),horaIni:hIni,horaFim:hFim,duracao:duracao(),fotos:fotos.slice(),foto:fotos[0]});
   localStorage.setItem('esq_v5',JSON.stringify(hist));
   pararTimer();
   marc[areaAtual]={};MAP[areaAtual].forEach(function(x){marc[areaAtual][x]=false;});
-  foto=null;horaIniObj=null;tsIni=null;
-  document.getElementById('fotoPreview').style.display='none';
-  document.getElementById('fotoPreview').src='';
+  fotos=[];horaIniObj=null;tsIni=null;
   document.getElementById('photoInput').value='';
-  document.getElementById('btnFim').disabled=true;
-  var h=document.getElementById('btnHint'); if(h) h.style.display='';
+  renderFotos();
   document.getElementById('relogio').textContent='00:00';
   document.getElementById('horaIni').textContent='--:--';
-  var z=document.getElementById('fotoZone');
-  z.classList.remove('tem');
-  z.querySelector('.foto-ico').style.display='';
-  z.querySelector('.foto-txt').style.display='';
   areaAtual=null;
   document.getElementById('checklistBox').style.display='none';
   document.getElementById('finBox').style.display='none';

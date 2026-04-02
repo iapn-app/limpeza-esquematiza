@@ -9,12 +9,12 @@
 body{font-family:-apple-system,sans-serif;background:#fff;color:#1a1a1a;min-height:100vh;font-size:16px;}
 
 /* HEADER */
-.header{background:#fff;border-bottom:2px solid #333a56;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;box-shadow:0 2px 8px rgba(51,58,86,.08);}
-.header img{height:192px;object-fit:contain;}
+.header{background:#fff;border-bottom:2px solid #333a56;padding:4px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;box-shadow:0 2px 8px rgba(51,58,86,.08);}
+.header img{height:192px;object-fit:contain;margin:-60px 0;}
 .header-titulo{font-size:13px;font-weight:700;color:#333a56;text-transform:uppercase;letter-spacing:1px;}
 
 /* TABS */
-.tabs{display:flex;background:#fff;border-bottom:1px solid #e5e7eb;position:sticky;top:212px;z-index:49;}
+.tabs{display:flex;background:#fff;border-bottom:1px solid #e5e7eb;position:sticky;top:80px;z-index:49;}
 .tab{flex:1;padding:14px;text-align:center;font-size:15px;font-weight:600;color:#888;border:none;background:none;cursor:pointer;border-bottom:3px solid transparent;font-family:-apple-system,sans-serif;}
 .tab.ativo{color:#333a56;border-bottom:3px solid #333a56;}
 
@@ -98,7 +98,8 @@ body{font-family:-apple-system,sans-serif;background:#fff;color:#1a1a1a;min-heig
 .foto-txt{font-size:14px;}
 #photoInput{display:none;}
 .btn-fim{width:100%;padding:16px;background:#333a56;color:#fff;font-size:16px;font-weight:700;border:none;border-radius:12px;cursor:pointer;font-family:-apple-system,sans-serif;margin-top:14px;transition:opacity .2s;}
-.btn-fim:disabled{opacity:.35;pointer-events:none;}
+.btn-fim:disabled{opacity:.45;pointer-events:none;cursor:not-allowed;}
+.btn-fim-hint{font-size:12px;color:#aaa;text-align:center;margin-top:6px;}
 .btn-fim:active{opacity:.8;}
 
 /* HISTÓRICO */
@@ -141,6 +142,19 @@ body{font-family:-apple-system,sans-serif;background:#fff;color:#1a1a1a;min-heig
 /* TOAST */
 .toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(10px);background:#333a56;color:#fff;font-weight:700;font-size:14px;padding:12px 22px;border-radius:30px;opacity:0;transition:all .3s;z-index:400;white-space:nowrap;pointer-events:none;}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+/* PARABÉNS */
+.parabens-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:500;align-items:center;justify-content:center;padding:24px;}
+.parabens-bg.aberto{display:flex;}
+.parabens-box{background:#fff;border-radius:24px;padding:36px 28px;width:100%;max-width:380px;text-align:center;position:relative;overflow:hidden;}
+.parabens-emoji{font-size:64px;display:block;margin-bottom:8px;animation:popIn .5s cubic-bezier(.36,.07,.19,.97) both;}
+.parabens-titulo{font-size:22px;font-weight:800;color:#333a56;margin-bottom:6px;}
+.parabens-nome{font-size:20px;font-weight:800;color:#333a56;margin-bottom:6px;}
+.parabens-sub{font-size:14px;color:#888;margin-bottom:24px;line-height:1.5;}
+.parabens-btn{width:100%;padding:15px;background:#333a56;color:#fff;font-size:16px;font-weight:700;border:none;border-radius:12px;cursor:pointer;font-family:-apple-system,sans-serif;}
+.confete-wrap{position:absolute;inset:0;pointer-events:none;overflow:hidden;}
+.c{position:absolute;top:-10px;width:8px;height:8px;border-radius:2px;animation:cair linear forwards;}
+@keyframes cair{0%{transform:translateY(0) rotate(0deg);opacity:1;}100%{transform:translateY(460px) rotate(720deg);opacity:0;}}
+@keyframes popIn{0%{transform:scale(0);opacity:0;}60%{transform:scale(1.2);}100%{transform:scale(1);opacity:1;}}
 </style>
 </head>
 <body>
@@ -210,6 +224,7 @@ body{font-family:-apple-system,sans-serif;background:#fff;color:#1a1a1a;min-heig
     <button class="btn-fim" id="btnFim" onclick="finalizar()" disabled>
       ✅ Concluir Serviço
     </button>
+    <div class="btn-fim-hint" id="btnHint">Tire uma foto acima para liberar este botão</div>
   </div>
 
 </div>
@@ -266,6 +281,8 @@ body{font-family:-apple-system,sans-serif;background:#fff;color:#1a1a1a;min-heig
 </div>
 
 <div class="toast" id="toast"></div>
+
+
 
 <script>
 var AREAS=[
@@ -416,6 +433,7 @@ function aoSelecionarFoto(e){
     z.querySelector('.foto-ico').style.display='none';
     z.querySelector('.foto-txt').style.display='none';
     document.getElementById('btnFim').disabled=false;
+    document.getElementById('btnHint').style.display='none';
   };
   r.readAsDataURL(f);
 }
@@ -437,6 +455,7 @@ function finalizar(){
   document.getElementById('fotoPreview').src='';
   document.getElementById('photoInput').value='';
   document.getElementById('btnFim').disabled=true;
+  var h=document.getElementById('btnHint'); if(h) h.style.display='';
   document.getElementById('relogio').textContent='00:00';
   document.getElementById('horaIni').textContent='--:--';
   var z=document.getElementById('fotoZone');
@@ -449,8 +468,7 @@ function finalizar(){
   desenharAreas();
   atualizarStats();
   popularFiltros();
-  toast('✅ Serviço concluído e registrado!');
-  mudarAba('historico');
+  abrirParabens(resp);
 }
 
 // POSTOS
@@ -526,11 +544,47 @@ function mudarAba(aba){
   if(aba==='historico'){renderHist();atualizarStats();}
 }
 
+
+function abrirParabens(nome){
+  document.getElementById('parabenNome').textContent = nome;
+  var wrap = document.getElementById('confeteWrap');
+  wrap.innerHTML = '';
+  var cores = ['#333a56','#667099','#a8b4d8','#f0c040','#e05a5a','#5ab88a','#5a9be0'];
+  for(var i=0;i<60;i++){
+    var d = document.createElement('div');
+    d.className = 'c';
+    d.style.left = Math.random()*100+'%';
+    d.style.background = cores[Math.floor(Math.random()*cores.length)];
+    d.style.width = (6+Math.random()*8)+'px';
+    d.style.height = (6+Math.random()*8)+'px';
+    d.style.animationDuration = (1.2+Math.random()*2)+'s';
+    d.style.animationDelay = (Math.random()*1.2)+'s';
+    wrap.appendChild(d);
+  }
+  document.getElementById('modalParabens').classList.add('aberto');
+}
+function fecharParabens(){
+  document.getElementById('modalParabens').classList.remove('aberto');
+  mudarAba('historico');
+}
+
 function toast(msg){
   var t=document.getElementById('toast');
   t.textContent=msg;t.classList.add('show');
   setTimeout(function(){t.classList.remove('show');},3000);
 }
+
 </script>
+
+<div class="parabens-bg" id="modalParabens">
+  <div class="parabens-box" id="parabensCaixa">
+    <div class="confete-wrap" id="confeteWrap"></div>
+    <span class="parabens-emoji">🏆</span>
+    <div class="parabens-titulo">Parabéns!</div>
+    <div class="parabens-nome" id="parabenNome"></div>
+    <div class="parabens-sub">Serviço concluído e registrado com sucesso.<br>Obrigado pelo ótimo trabalho! 💪</div>
+    <button class="parabens-btn" onclick="fecharParabens()">Ver histórico</button>
+  </div>
+</div>
 </body>
 </html>

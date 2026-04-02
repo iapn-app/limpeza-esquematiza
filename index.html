@@ -431,8 +431,7 @@ function aoSelecionarFoto(e){
   var r=new FileReader();
   r.onload=function(ev){
     fotos.push(ev.target.result);
-    fotos=[];
-  renderFotos();
+    renderFotos();
     document.getElementById('photoInput').value='';
   };
   r.readAsDataURL(f);

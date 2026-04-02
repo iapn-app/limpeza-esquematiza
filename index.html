@@ -230,7 +230,6 @@ body{font-family:-apple-system,sans-serif;background:#fff;color:#1a1a1a;min-heig
       ✅ Concluir Serviço
     </button>
     <div class="btn-fim-hint" id="btnHint">Tire uma foto acima para liberar este botão</div>
-    <button type="button" style="width:100%;padding:10px;background:red;color:white;border:none;border-radius:8px;margin-top:8px;font-size:14px;" onclick="testarBotao()">🔍 DEBUG: ver estado</button>
   </div>
 
 </div>
@@ -428,24 +427,31 @@ function desenharTiles(){
 function marcar(iid){marc[areaAtual][iid]=!marc[areaAtual][iid];desenharTiles();desenharAreas();}
 
 function aoSelecionarFoto(e){
-  var f=e.target.files[0];
-  if(!f){alert('DEBUG: nenhum arquivo');return;}
-  alert('DEBUG foto selecionada: '+f.name);
-  var r=new FileReader();
-  r.onload=function(ev){
-    fotos.push(ev.target.result);
-    alert('DEBUG foto no array! total='+fotos.length);
+  var files=e.target.files;
+  if(!files||files.length===0){return;}
+  var f=files[0];
+  var url=URL.createObjectURL(f);
+  var img=new Image();
+  img.onload=function(){
+    var canvas=document.createElement('canvas');
+    var max=1200;
+    var w=img.width, h=img.height;
+    if(w>max){h=Math.round(h*max/w);w=max;}
+    if(h>max){w=Math.round(w*max/h);h=max;}
+    canvas.width=w;canvas.height=h;
+    canvas.getContext('2d').drawImage(img,0,0,w,h);
+    var dataUrl=canvas.toDataURL('image/jpeg',0.7);
+    URL.revokeObjectURL(url);
+    fotos.push(dataUrl);
     renderFotos();
-    alert('DEBUG renderFotos ok. btn disabled='+document.getElementById('btnFim').disabled);
   };
-  r.onerror=function(){alert('ERRO FileReader');};
-  r.readAsDataURL(f);
-  e.target.value='';
+  img.onerror=function(){
+    URL.revokeObjectURL(url);
+    alert('Erro ao processar foto. Tente novamente.');
+  };
+  img.src=url;
 }
 
-function testarBotao(){
-  alert('fotos='+fotos.length+' posto='+postoAtual+' area='+areaAtual);
-}
 
 function renderFotos(){
   var grid=document.getElementById('fotosGrid');
